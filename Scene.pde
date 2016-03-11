@@ -22,6 +22,8 @@ class Ray extends Scene {
   public Vec direction = V();
   public float minDistance = 1.0e16;
   public int objectIndex = -1;
+  Vec normal;
+  Vec hit;
   public Scene scene = null;
   Ray(Vec origin) {
     super(origin, "ray");
@@ -31,7 +33,9 @@ class Ray extends Scene {
     this.direction = direction;
   }
   Vec flipDirection() {
-    return direction.scale(-1.0);
+    //return V(direction.x * -1,direction.y * -1,direction.z * -1);
+    //return direction.scale(-1.0);
+    return scaleV(direction,-1.0);
   }
   String toString(){
     return "origin: " + origin.toString() + " Direction: "+ direction.toString();

@@ -1,18 +1,50 @@
+//---------------Instance---------------
+
 class Instance extends Scene{
   public Transform transform;
+  public Transform tempTransform;
   public Scene scene;
-  Instance(Transform transform, Scene scene){super(V(), "instance"); this.transform=transform; this.scene = scene;}
+  Instance(Transform transform, Scene scene){
+    super(V(), "instance"); this.transform=transform; this.scene = scene;tempTransform = new Transform();makeInverse();}
+  void makeInverse(){
+    tempTransform.matrix = transform.inverse(transform.matrix);  
+  }
   void intersectionMethod(Ray ray){
     
-    scene.intersectionMethod(ray);
+    Ray tempRay = new Ray(scaleV(tempTransform.transform(ray.origin), -1.0), scaleV(tempTransform.transform(ray.direction), -1.0));
+    scene.intersectionMethod(tempRay);
+    if(tempRay.minDistance<ray.minDistance){
+      ray.minDistance = tempRay.minDistance;
+      ray.scene = this;
+      ray.normal = tempTransform.transform(scaleV(tempRay.normal, -1.0));
+      /*
+      float[][] mat = new float[4][4];
+      mat = transform.inverse(transform.matrix);
+      ray.normal = freeTransform(scaleV(tempRay.normal, -1.0), mat);
+      */
+      ray.hit = travelV(tempRay.origin, tempRay.flipDirection(), tempRay.minDistance); 
+    }
+    
+    //scene.intersectionMethod(ray);
+    //if(ray.scene == scene) ray.scene= this;
   }
   
   Vec lightObject(Ray ray) {
-    return scene.lightObject(ray);
+
+    Ray tempRay = new Ray(scaleV(tempTransform.transform(ray.origin), -1.0), scaleV(tempTransform.transform(ray.direction), -1.0));
+    tempRay.hit = ray.hit;
+    tempRay.normal = ray.normal.normalize();
+    return scene.lightObject(tempRay);
+
+    //return V();
+    //return scene.lightObject(ray);    
   }
-
-
 }
+
+//---------------End Instance---------------
+
+//---------------Sphere---------------
+
 
 class Sphere extends Scene {
   public float radius;
@@ -43,35 +75,37 @@ class Sphere extends Scene {
       if (d1 > 0.0 && d1<d2 && d1 < ray.minDistance) {
         ray.minDistance = d1;
         ray.scene = this;
+        ray.hit = travelV(ray.origin, ray.flipDirection(), ray.minDistance); 
+        ray.normal = normalV(subV(ray.hit, origin));
       } else if (d2 > 0.0 && d2<d1 && d2 < ray.minDistance) {
         ray.minDistance = d2;
         ray.scene = this;
+        ray.hit = travelV(ray.origin, ray.flipDirection(), ray.minDistance); 
+        ray.normal = normalV(subV(ray.hit, origin));      
       }
     }
   }
 
   Vec lightObject(Ray ray) {
     Vec surfaceColor = V();
-    Vec hit = travelV(ray.origin, ray.flipDirection(), ray.minDistance);  
-    Vec norHit = normalV(subV(hit, origin));
     //if(dotV(norHit, direction) > 0.0)norHit = scaleV(norHit, -1.0);
     for (int i =0; i< lights.size(); i++) {
-      Vec lightDirection = lights.get(i).getDirection(hit);
-      Ray reverse = new Ray(hit, scaleV(lightDirection, -1));
+      Vec lightDirection = lights.get(i).getDirection(ray.hit);
+      Ray reverse = new Ray(ray.hit, scaleV(lightDirection, -1));
       for (int j =0; j<sceneObjects.size(); j++) {
         if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
         if (reverse.scene !=null) {        
           if (reverse.scene.type.equals("polygon")) {
             Vec v0 = ((Polygon)reverse.scene).vertices.get(0);
-            hit = travelV(reverse.origin, reverse.direction, -reverse.minDistance);
+            reverse.hit = travelV(reverse.origin, reverse.direction, -reverse.minDistance);
             Vec rN = ((Polygon)reverse.scene).getNormal();
-            float Q = dotV(rN, subV(v0, hit));
+            float Q = dotV(rN, subV(v0, reverse.hit));
             if (Q !=0) reverse.scene = null;
           }
         }
       }
       if (reverse.scene ==null) {
-        float diffCoeff = dotV(lightDirection, norHit);
+        float diffCoeff = dotV(lightDirection, ray.normal);
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }
     }
@@ -79,6 +113,9 @@ class Sphere extends Scene {
   }
 }
 
+//---------------End Sphere---------------
+
+//---------------Moving Sphere---------------
 class movingSphere extends Scene {
   public float radius;
   public Vec origin1;
@@ -149,7 +186,9 @@ class movingSphere extends Scene {
   }
 }
 
+//---------------End Moving Sphere---------------
 
+//---------------Polygon---------------
 class Polygon extends Scene {
   ArrayList<Vec> vertices =new  ArrayList<Vec>();
   Polygon() {
@@ -242,3 +281,5 @@ class Polygon extends Scene {
     }
   }
 }
+
+//---------------End Polygon---------------

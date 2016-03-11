@@ -24,7 +24,7 @@ float[] gmat = new float[16];  // global matrix values
 // Some initializations for the scene.
 
 void setup() {
-  size (300, 300, P3D);  // use P3D environment so that matrix commands work properly
+  size (900, 900, P3D);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
@@ -135,18 +135,16 @@ void interpreter(String filename) {
       background=  V(float(token[1]), float(token[2]), float(token[3]));
     } else if (token[0].equals("named_object")) {
       namedScene named = new namedScene(token[1], sceneObjects.get(sceneObjects.size() -1));
-      println(sceneObjects.size());
       sceneObjects.remove(sceneObjects.size() -1);
-      println(sceneObjects.size());
       namedObjects.add(named);
     }else if (token[0].equals("instance")) {
       namedScene named = new namedScene(token[1], new Sphere(V()));
       int exists = namedObjects.indexOf(named);
-      println(namedObjects.indexOf(named));
       if(exists >= 0){
         Instance instance = new Instance(matrices.get(currentTransform), namedObjects.get(exists).scene);
         sceneObjects.add(instance);
       }
+      else println("Object not found");
       
     }else if (token[0].equals("point_light")) {
       Vec origin = V(float(token[1]), float(token[2]), float(token[3]));
@@ -216,6 +214,17 @@ void interpreter(String filename) {
       currentTransform-=1;
     } else if (token[0].equals("write")) {
       // save the current image to a .png file
+      /*
+      matrices.get(currentTransform).translate(V(1,2,3));
+      matrices.get(currentTransform).scale(V(5,7,3));
+      println(matrices.get(currentTransform).toString());
+      float[][] tempeh = matrices.get(currentTransform).matrix;
+      matrices.get(currentTransform).matrix = matrices.get(currentTransform).inverse(matrices.get(currentTransform).matrix);
+      println(matrices.get(currentTransform).toString());
+      matrices.get(currentTransform).matrix = TMM(tempeh, matrices.get(currentTransform).matrix);
+      println(matrices.get(currentTransform).toString());
+      */
+      
       colorImage(background);
       save(token[1]);
     }
