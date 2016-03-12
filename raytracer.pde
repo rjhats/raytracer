@@ -256,7 +256,7 @@ Vec computePixel(Vec background, Ray ray) {
 }
 void colorImage(Vec background) {
   loadPixels();
-  float angle = tan(PI * 0.5 * fov / 180.);
+  float angle = tan(PI * 0.5 * fov / 180.0);
   if(numRays < 1) numRays = 1;
   for (int i = 0; i < width*height; i++) {
     int x = i%width;

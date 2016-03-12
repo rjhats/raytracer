@@ -272,7 +272,7 @@ Transform copy(Transform t) {
   return new Transform();
 }
 
-Vec freeTransform(Vec v, float[][] matrix) {
+Vec freeTransform(float[][] matrix, Vec v) {
     if(matrix.length <4){println("no"); return null;}
     float x = (matrix[0][0] * v.x) + (matrix[0][1] * v.y) + (matrix[0][2] * v.z) + (matrix[0][3] * 1);
     float y = (matrix[1][0] * v.x) + (matrix[1][1] * v.y) + (matrix[1][2] * v.z) + (matrix[1][3] * 1);
