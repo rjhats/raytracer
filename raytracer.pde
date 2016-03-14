@@ -24,7 +24,7 @@ float[] gmat = new float[16];  // global matrix values
 // Some initializations for the scene.
 
 void setup() {
-  size (900, 900, P3D);  // use P3D environment so that matrix commands work properly
+  size (300, 300, P3D);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
@@ -139,9 +139,9 @@ void interpreter(String filename) {
       namedObjects.add(named);
     }else if (token[0].equals("instance")) {
       namedScene named = new namedScene(token[1], new Sphere(V()));
-      int exists = namedObjects.indexOf(named);
-      if(exists >= 0){
-        Instance instance = new Instance(matrices.get(currentTransform), namedObjects.get(exists).scene);
+      int scenePosition = namedObjects.indexOf(named);
+      if(scenePosition >= 0){
+        Instance instance = new Instance(matrices.get(currentTransform), scenePosition);
         sceneObjects.add(instance);
       }
       else println("Object not found");
@@ -168,7 +168,13 @@ void interpreter(String filename) {
       // TODO
       Vec O1 = matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4])));
       Vec O2 = matrices.get(currentTransform).transform(V(float(token[5]), float(token[6]), float(token[7])));
-      movingSphere object = new movingSphere(float(token[1]), O1, O2, diffuseColor, diffuseAmbient);
+      MovingSphere object = new MovingSphere(float(token[1]), O1, O2, diffuseColor, diffuseAmbient);
+      sceneObjects.add(object);
+    }else if (token[0].equals("box")) {
+      // TODO
+      Vec min = matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3])));
+      Vec max = matrices.get(currentTransform).transform(V(float(token[4]), float(token[5]), float(token[6])));
+      Box object = new Box(min, max, diffuseColor, diffuseAmbient);
       sceneObjects.add(object);
     }else if (token[0].equals("begin")) {      
       Polygon polygon = new Polygon();
@@ -266,16 +272,16 @@ void colorImage(Vec background) {
         float shiftTerm = (s)/((float)numRays);
         float xPrime = (2 * ((x +shiftTerm)/width) - 1) * angle * aspectratio;
         float yPrime = (1 - 2 * ((y +shiftTerm)/height)) * angle; 
-        Vec direction = V(-xPrime, -yPrime, 1.0).normalize();
+        Vec direction = V(xPrime, yPrime, -1.0).normalize();
         Ray ray = new Ray(eye, direction);
         if(usingLens){
           float t = (-focalDistance - eye.z)/direction.z;
-          Vec focalPoint = travelV(eye, direction, -t);          
+          Vec focalPoint = travelV(eye, direction, t);          
           float AppUy = random(lensRadius);
           float theta = random(2* PI);
           Vec nuEye = addV(eye, V(AppUy * cos(theta), AppUy * sin(theta), 0));
           Vec nu_dir = subV(focalPoint, nuEye).normalize();
-          ray = new Ray(scaleV(nuEye, -1), nu_dir);
+          ray = new Ray(scaleV(nuEye, 1), nu_dir);
           /*
           if(x==50){
             float t1 = (-focalDistance - nuEye.z)/nu_dir.z;

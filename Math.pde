@@ -85,6 +85,9 @@ Vec crossV(Vec v1, Vec v2) {
 Vec multV(Vec v1, Vec v2) { 
   return V(v1.x*v2.x, v1.y*v2.y, v1.z*v2.z);
 }
+Vec invertV(Vec v){
+  return V(1/v.x, 1/v.y, 1/v.z);
+}
 float dotV(Vec v1, Vec v2) { 
   return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 }
