@@ -230,7 +230,12 @@ void interpreter(String filename) {
       matrices.get(currentTransform).matrix = TMM(tempeh, matrices.get(currentTransform).matrix);
       println(matrices.get(currentTransform).toString());
       */
-      
+      /*
+      Sphere s = new Sphere(V());
+      for(int k = 0; k<sceneObjects.size(); k++){
+        println(sceneObjects.get(0).equals(sceneObjects.get(k)));      
+      }
+      */
       colorImage(background);
       save(token[1]);
     }
@@ -255,8 +260,8 @@ float rayIntersection(Ray ray) {
 
 Vec computePixel(Vec background, Ray ray) {
   rayIntersection(ray);
-  if (ray.scene != null) {
-    return ray.scene.lightObject(ray);
+  if (ray.sceneIndex >-1) {
+    return ray.getScene().lightObject(ray);
   }
   return background;
 }

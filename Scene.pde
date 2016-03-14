@@ -21,16 +21,19 @@ class Scene {
 class Ray extends Scene {
   public Vec direction = V();
   public float minDistance = 1.0e16;
-  public int objectIndex = -1;
-  Vec normal;
-  Vec hit;
-  public Scene scene = null;
+  public int sceneIndex = -1;
+  public Vec normal;
+  public Vec hit;
   Ray(Vec origin) {
     super(origin, "ray");
   }
   Ray(Vec origin, Vec direction) {
     super(origin, "ray"); 
     this.direction = direction;
+  }
+  Scene getScene(){
+    return sceneObjects.get(sceneIndex);
+  
   }
   Vec flipDirection() {
     //return V(direction.x * -1,direction.y * -1,direction.z * -1);

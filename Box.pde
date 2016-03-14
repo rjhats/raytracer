@@ -47,7 +47,7 @@ class Box extends Scene{
       if(txMin>0 && txMax > 0){ray.minDistance = min(txMin, txMax);}
       else if(txMin>0 && txMax < 0){ray.minDistance = txMin;}
       else if(txMin<0 && txMax > 0){ray.minDistance = txMax;}
-      ray.scene = this;
+      ray.sceneIndex = sceneObjects.indexOf(this);
       ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);
     }
   }
@@ -64,7 +64,7 @@ class Box extends Scene{
         if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
       }
 
-      if (reverse.scene ==null) {
+      if (reverse.sceneIndex <0) {
         float diffCoeff = abs(dotV(lightDirection, n));
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }

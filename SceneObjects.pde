@@ -22,8 +22,9 @@ class Instance extends Scene{
     //if(hitAmount <=100)println(tempRay.toString());
     //hitAmount++;
     namedObjects.get(scenePosition).scene.intersectionMethod(tempRay);
-    if(tempRay.scene !=null && tempRay.minDistance < ray.minDistance) {      
-      ray.scene = this;
+    if(tempRay.minDistance < ray.minDistance) {
+      //println("hit");
+      ray.sceneIndex = sceneObjects.indexOf(this);
       ray.minDistance = tempRay.minDistance;
       ray.hit = tempRay.hit;
       //ray.normal = tempTransform.transform(tempRay.direction);//freeTransform(transform.adjoint(transform.matrix), (tempRay.normal));
@@ -79,12 +80,12 @@ class Sphere extends Scene {
       float d2 = (-b + sqrt(sq(b) - (4*a*c)))/ (2*a);
       if (-d1 > 0.0 && d1>d2 && abs(d1) < abs(ray.minDistance)) {
         ray.minDistance = abs(d1);
-        ray.scene = this;
+        ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
         ray.normal = normalV(subV(ray.hit, origin));
       } else if (-d2 > 0.0 && d2>d1 && abs(d2) < abs(ray.minDistance)) {
         ray.minDistance = abs(d2);
-        ray.scene = this;
+        ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
         ray.normal = normalV(subV(ray.hit, origin));      
       }
@@ -99,19 +100,8 @@ class Sphere extends Scene {
       Ray reverse = new Ray(ray.hit, scaleV(lightDirection, 1));
       for (int j =0; j<sceneObjects.size(); j++) {
         if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
-        if (reverse.scene !=null) {        
-          /*
-          if (reverse.scene.type.equals("polygon")) {
-            Vec v0 = ((Polygon)reverse.scene).vertices.get(0);
-            reverse.hit = travelV(reverse.origin, reverse.direction, -reverse.minDistance);
-            Vec rN = ((Polygon)reverse.scene).getNormal();
-            float Q = dotV(rN, subV(v0, reverse.hit));
-            if (Q !=0) reverse.scene = null;
-          }
-          */
-        }
       }
-      if (reverse.scene ==null) {
+      if (reverse.sceneIndex < 0) {
         float diffCoeff = dotV(lightDirection, ray.normal);
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }
@@ -159,12 +149,12 @@ class MovingSphere extends Scene {
       float d2 = (-b + sqrt(bac))/ (2*a);
       if (-d1 > 0.0 && d1>d2 && abs(d1) < abs(ray.minDistance)) {
         ray.minDistance = abs(d1);
-        ray.scene = this;
+        ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
         ray.normal = normalV(subV(ray.hit, origin));
       } else if (-d2 > 0.0 && d2>d1 && abs(d2) < abs(ray.minDistance)) {
         ray.minDistance = abs(d2);
-        ray.scene = this;
+        ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
         ray.normal = normalV(subV(ray.hit, origin));      
       }
@@ -179,19 +169,8 @@ class MovingSphere extends Scene {
       Ray reverse = new Ray(ray.hit, scaleV(lightDirection, 1));
       for (int j =0; j<sceneObjects.size(); j++) {
         if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
-        if (reverse.scene !=null) {   
-          /*
-          if (reverse.scene.type.equals("polygon")) {
-            Vec v0 = ((Polygon)reverse.scene).vertices.get(0);
-            hit = travelV(reverse.origin, reverse.direction, -reverse.minDistance);
-            Vec rN = ((Polygon)reverse.scene).getNormal();
-            float Q = dotV(rN, subV(v0, hit));
-            if (Q !=0) reverse.scene = null;
-          }
-          */
-        }
       }
-      if (reverse.scene ==null) {
+      if (reverse.sceneIndex < 0) {
         float diffCoeff = dotV(lightDirection, ray.normal);
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }
@@ -229,18 +208,9 @@ class Polygon extends Scene {
 
       for (int j =0; j<sceneObjects.size(); j++) {
         if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
-        if (reverse.scene !=null) {        
-          if (reverse.scene.type.equals("polygon")) {
-            Vec v0 = ((Polygon)reverse.scene).vertices.get(0);
-            hit = travelV(reverse.origin, reverse.direction, -reverse.minDistance);
-            Vec rN = ((Polygon)reverse.scene).getNormal();
-            float Q = dotV(rN, subV(v0, hit));
-            if (Q !=0) reverse.scene = null;
-          }
-        }
       }
 
-      if (reverse.scene ==null) {
+      if (reverse.sceneIndex <0) {
         float diffCoeff = abs(dotV(lightDirection, n));
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }
@@ -291,7 +261,7 @@ class Polygon extends Scene {
       }
       if (abs(ray.minDistance) > abs(t)) {
         ray.minDistance = abs(t);
-        ray.scene = this;
+        ray.sceneIndex = sceneObjects.indexOf(this);
       }
     }
   }
