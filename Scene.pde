@@ -1,4 +1,5 @@
 class Scene {
+  public Box box;
   public Vec origin = V(0, 0, 0);
   public String type = "";
   public Vec diffuseColor = V();
@@ -19,6 +20,9 @@ class Scene {
   void setColor(Vec Color, Vec ambient) {
     this.diffuseColor = Color; 
     this.diffuseAmbient = ambient;
+  }
+  Box getBox(){
+    return box;
   }
 }
 

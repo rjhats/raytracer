@@ -1,6 +1,9 @@
 class Box extends Scene{
   Vec minCoords;
   Vec maxCoords;
+  //public Vec diffuseColor = V(random(1.0),random(1.0),random(1.0));
+  public Vec diffuseColor = V(.8,.4,.2);
+  public Vec diffuseAmbient = V(diffuseColor.x/4.0,diffuseColor.y/4.0,diffuseColor.z/4.0);
   Box(Vec minCoords, Vec maxCoords){super(V(), "box"); this.minCoords = minCoords; this.maxCoords = maxCoords;}
   Box(Vec minCoords, Vec maxCoords, Vec diffuseColor, Vec diffuseAmbient){
     super(V(), "box"); 
@@ -8,6 +11,9 @@ class Box extends Scene{
     this.maxCoords = maxCoords;
     this.diffuseColor = diffuseColor;
     this.diffuseAmbient = diffuseAmbient;
+  }
+  public Box getBox(){
+    return this;
   }
   void intersectionMethod(Ray ray){
     float txMin = (minCoords.x - ray.origin.x)/ray.direction.x;
@@ -48,23 +54,21 @@ class Box extends Scene{
       else if(txMin<0 && txMax > 0){ray.minDistance = txMax;}
       ray.sceneIndex = sceneObjects.indexOf(this);
       ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);
+      ray.normal = getNormal(ray.hit);
     }
   }
   
   Vec lightObject(Ray ray) {
     Vec surfaceColor = V();
-    Vec n = getNormal(ray.hit);
-      for (int i =0; i< lights.size(); i++) {
+    for (int i =0; i< lights.size(); i++) {
       Vec lightDirection = lights.get(i).getDirection(ray.hit);
-      if (dotV(n, lightDirection) > 0.0)n = scaleV(n, -1.0);
-      Ray reverse = new Ray(ray.hit, scaleV(lightDirection, 1));
-
+      if (dotV(ray.normal, lightDirection) > 0.0)ray.normal = scaleV(ray.normal, -1.0);
+      Ray reverse = new Ray(ray.hit, scaleV(lightDirection, 1));      
       for (int j =0; j<sceneObjects.size(); j++) {
         if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
-      }
-
+      }      
       if (reverse.sceneIndex <0) {
-        float diffCoeff = abs(dotV(lightDirection, n));
+        float diffCoeff = abs(dotV(lightDirection, ray.normal));
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }
     }
@@ -112,5 +116,8 @@ class Box extends Scene{
     else{Vec c1 = subV(V(minCoords.x,maxCoords.y,maxCoords.z),maxCoords);
       Vec c2 = subV(V(maxCoords.x,minCoords.y,maxCoords.z),maxCoords);
       return crossV(c2,c1).normalize(); }
+  }
+  String toString(){
+    return "Min: " + minCoords.toString() +" Max: " + maxCoords.toString();
   }
 }

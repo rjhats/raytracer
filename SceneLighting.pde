@@ -6,7 +6,7 @@ class PLight extends Light {
     super(origin, "point_light"); 
     this.light_color = light_color;
   }
-  Vec getDirection(Vec hit){return normalV(subV(origin, hit));}
+  Vec getDirection(Vec hit){return normalizeV(subV(origin, hit));}
   
 }
 
@@ -23,7 +23,7 @@ class diskLight extends Light{
     float theta = random(2*PI);
     float randRad = random(radius);
     Vec pt = addV(origin,addV(scaleV(V,sin(theta)*randRad), scaleV(R, cos(theta)*randRad)));
-    return normalV(subV(pt, hit));
+    return normalizeV(subV(pt, hit));
   }
 }
 

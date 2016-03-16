@@ -57,7 +57,7 @@ Vec V() {
 Vec V(float x, float y, float z) { 
   return new Vec(x, y, z);
 }
-Vec normalV(Vec v) { 
+Vec normalizeV(Vec v) { 
   float mag = v.magnitude(); 
   if (mag!=0) { 
     return V(v.x/mag, v.y/mag, v.z/mag);
@@ -70,8 +70,14 @@ Vec V(float x, float y) {
 Vec addV(Vec v1, Vec v2) { 
   return V(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
+Vec addV(Vec v1, float s){
+  return V(v1.x + s, v1.y + s, v1.z + s);
+}
 Vec subV(Vec v1, Vec v2) { 
   return V(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+}
+Vec subV(Vec v1, float s){
+  return V(v1.x - s, v1.y - s, v1.z - s);
 }
 Vec scaleV(Vec v, float s) {
   return V(v.x *s, v.y*s, v.z*s);

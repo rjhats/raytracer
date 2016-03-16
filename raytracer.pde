@@ -20,7 +20,8 @@ Vec diffuseColor = V(0, 0, 0), diffuseAmbient = V(0, 0, 0), background = V(0, 0,
 // global matrix values
 PMatrix3D global_mat;
 float[] gmat = new float[16];  // global matrix values
-int stringIncrement = 0;
+ArrayList<ArrayList<Scene>> shuu = new ArrayList<ArrayList<Scene>>();
+int timer = 0;
 // Some initializations for the scene.
 
 void setup() {
@@ -28,7 +29,6 @@ void setup() {
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
-
   // grab the global matrix values (to use later when drawing pixels)
   PMatrix3D global_mat = (PMatrix3D) getMatrix();
   global_mat.get(gmat);  
@@ -47,59 +47,60 @@ void keyPressed() {
     println("starting 1");
     restartTracing();
     interpreter("t01.cli");
-    println("finished 1");
+    println("finished 1\n");
     break;
   case '2':  
   println("starting 2");
     restartTracing();
     interpreter("t02.cli"); 
-    println("finished 2");
+    println("finished 2\n");
     break;
   case '3':  
   println("starting 3");
     restartTracing();
     interpreter("t03.cli"); 
-    println("finished 3");
+    println("finished 3\n");
     break;
   case '4':  
   println("starting 4");
     restartTracing();
     interpreter("t04.cli"); 
-    println("finished 4");
+    println("finished 4\n");
     break;
   case '5':  
   println("starting 5");
     restartTracing();
     interpreter("t05.cli");
-    println("finished 5");
+    println("finished 5\n");
     break;
   case '6': 
   println("starting 6");
     restartTracing();
     interpreter("t06.cli");
-    println("finished 6");
+    println("finished 6\n");
     break;
   case '7':  
   println("starting 7");
     restartTracing();
     interpreter("t07.cli");
-    println("finished 7");
+    println("finished 7\n");
     break;
   case '8':  
   println("starting 8");
     restartTracing();
     interpreter("t08.cli"); 
-    println("finished 8");
+    println("finished 8\n");
     break;
   case '9':  
   println("starting 9");
     restartTracing();
     interpreter("t09.cli"); 
-    println("finished 9");
+    println("finished 9\n");
     break;
-  case '0':  
+  case '0':
+  println("starting 10");
     restartTracing();
-    interpreter("t10.cli"); 
+    interpreter("t10.cli\n"); 
     break;
   case 'q':  
     exit(); 
@@ -134,8 +135,8 @@ void interpreter(String filename) {
     }else if (token[0].equals("background")) {
       background=  V(float(token[1]), float(token[2]), float(token[3]));
     } else if (token[0].equals("named_object")) {
-      namedScene named = new namedScene(token[1], sceneObjects.get(sceneObjects.size() -1));
-      sceneObjects.remove(sceneObjects.size() -1);
+      namedScene named = new namedScene(token[1], shuu.get(shuu.size()-1).get(shuu.get(shuu.size()-1).size() -1));
+      shuu.get(shuu.size()-1).remove(shuu.get(shuu.size()-1).size() -1);
       namedObjects.add(named);
     }else if (token[0].equals("point_light")) {
       Vec origin = V(float(token[1]), float(token[2]), float(token[3]));
@@ -156,7 +157,20 @@ void interpreter(String filename) {
               token[0].equals("moving_sphere") ||
               token[0].equals("sphere") ||
               token[0].equals("begin")) {
-      i = loadObject(sceneObjects, str, i);
+      i = loadObject( str, i);
+    }else if (token[0].equals("begin_list")) {      
+      
+      shuu.add(new ArrayList<Scene>());
+    }else if (token[0].equals("end_list")) {
+      List list = new List(shuu.get(shuu.size()-1));      
+      shuu.remove(shuu.size()-1);
+      shuu.get(shuu.size()-1).add(list);
+      println("added list" + sceneObjects.size());
+    }else if (token[0].equals("end_accel")) {
+      List list = new List(shuu.get(shuu.size()-1));      
+      shuu.remove(shuu.size()-1);
+      shuu.get(shuu.size()-1).add(list);
+      println("added list" + sceneObjects.size());
     }else if (token[0].equals("read")) {  // reads input from another file
       interpreter (token[1]);
     } else if (token[0].equals("color")) {  // example command -- not part of ray tracer
@@ -183,27 +197,20 @@ void interpreter(String filename) {
       // save the current image to a .png file
       matrices.remove(currentTransform);
       currentTransform-=1;
+    } else if (token[0].equals("reset_timer")) {
+      timer = millis();
+    } else if (token[0].equals("print_timer")) {
+      int new_timer = millis();
+      int diff = new_timer - timer;
+      float seconds = diff / 1000.0;
+      println ("timer = " + seconds);
     } else if (token[0].equals("write")) {
       // save the current image to a .png file
-      /*
-      matrices.get(currentTransform).translate(V(1,2,3));
-      matrices.get(currentTransform).scale(V(5,7,3));
-      println(matrices.get(currentTransform).toString());
-      float[][] tempeh = matrices.get(currentTransform).matrix;
-      matrices.get(currentTransform).matrix = matrices.get(currentTransform).inverse(matrices.get(currentTransform).matrix);
-      println(matrices.get(currentTransform).toString());
-      matrices.get(currentTransform).matrix = TMM(tempeh, matrices.get(currentTransform).matrix);
-      println(matrices.get(currentTransform).toString());
-      */
-      /*
-      Sphere s = new Sphere(V());
-      for(int k = 0; k<sceneObjects.size(); k++){
-        println(sceneObjects.get(0).equals(sceneObjects.get(k)));      
-      }
-      */
+      println(sceneObjects.size());
       colorImage(background);
       save(token[1]);
     }
+
   }
 }
 
@@ -274,7 +281,10 @@ void colorImage(Vec background) {
 void restartTracing() {
   clear();
   matrices.clear();
+  namedObjects.clear();
   sceneObjects.clear();
+  shuu.clear();
+  shuu.add(sceneObjects);
   lights.clear();
   matrices.add(new Transform());
   currentTransform =0;
@@ -284,68 +294,47 @@ void restartTracing() {
   usingLens = false;
 }
 
-int loadObject(ArrayList<Scene> listOfScenes, String[] str, int i ){
+int loadObject(String[] str, int i ){
   String[] token = splitTokens(str[i], " "); // Get a line and parse tokens.
   if (token[0].equals("instance")) {
-      namedScene named = new namedScene(token[1], new Sphere(V()));
+      namedScene named = new namedScene(token[1], new Sphere());
       int scenePosition = namedObjects.indexOf(named);
       if(scenePosition >= 0){
         Instance instance = new Instance(matrices.get(currentTransform), scenePosition);
-        listOfScenes.add(instance);
+        shuu.get(shuu.size()-1).add(instance);
       }
-      else println("Object not found");
-      
-    }
-    else if (token[0].equals("sphere")) {
+      else println("Object not found");      
+    } else if (token[0].equals("sphere")) {
       // TODO
       Sphere object = new Sphere(float(token[1]), matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4]))), diffuseColor, diffuseAmbient);
-      listOfScenes.add(object);
+      shuu.get(shuu.size()-1).add(object);
     } else if (token[0].equals("moving_sphere")) {
       // TODO
       Vec O1 = matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4])));
       Vec O2 = matrices.get(currentTransform).transform(V(float(token[5]), float(token[6]), float(token[7])));
       MovingSphere object = new MovingSphere(float(token[1]), O1, O2, diffuseColor, diffuseAmbient);
-      listOfScenes.add(object);
+      shuu.get(shuu.size()-1).add(object);
     }else if (token[0].equals("box")) {
       // TODO
       Vec min = matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3])));
       Vec max = matrices.get(currentTransform).transform(V(float(token[4]), float(token[5]), float(token[6])));
       Box object = new Box(min, max, diffuseColor, diffuseAmbient);
-      listOfScenes.add(object);
+      shuu.get(shuu.size()-1).add(object);
     }else if (token[0].equals("begin")) {      
-      Polygon polygon = new Polygon();
-      polygon.setColor(diffuseColor, diffuseAmbient);
+      ArrayList<Vec> vertices =new  ArrayList<Vec>();
       i++; 
       token = splitTokens(str[i], " "); // Get a line and parse tokens.
       while (token[0].equals("vertex")) {
                 //println("adding " + (V(float(token[1]), float(token[2]), float(token[3]))).toString());
-        polygon.vertices.add(matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3]))));
+        vertices.add(matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3]))));
         i++; 
         token = splitTokens(str[i], " ");
       }
-      if (token[0].equals("end")) {sceneObjects.add(polygon);
+      if (token[0].equals("end")) {
+        Polygon polygon = new Polygon(vertices,diffuseColor, diffuseAmbient);
+        shuu.get(shuu.size()-1).add(polygon);
       //println("ending "+ i + " " +sceneObjects.size() +"\n");
       }
-    }
-    else if (token[0].equals("begin_list")) {      
-      List object = new List();
-      i++; 
-      token = splitTokens(str[i], " "); // Get a line and parse tokens.
-      while (!token[0].equals("end_list")) {
-        loadObject(object.getList(), str, i);
-        i++; 
-        token = splitTokens(str[i], " ");
-      }
-      if (token[0].equals("end_list")) {listOfScenes.add(object);
-      }
-    }
+    }    
     return i;
-
-
-
-
-
-
-
-
 }

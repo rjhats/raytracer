@@ -7,7 +7,7 @@ class Instance extends Scene{
   public Transform tempTransform2 = new Transform();
   public int scenePosition;
   Instance(Transform transform, int scenePosition){
-    super("instance"); this.transform.matrix=transform.matrix; this.scenePosition = scenePosition;makeInverse();}
+    super("instance"); this.transform.matrix=transform.matrix; this.scenePosition = scenePosition;makeInverse(); box = namedObjects.get(scenePosition).scene.getBox();}
   void makeInverse(){
     tempTransform.matrix = inverse(transform.matrix);
     tempTransform2.matrix = adjoint(transform.matrix);
@@ -31,7 +31,7 @@ class Instance extends Scene{
       //ray.normal = tempTransform.transform(tempRay.direction);//freeTransform(transform.adjoint(transform.matrix), (tempRay.normal));
       //ray.normal = tempRay.normal;
       //ray.normal = tempTransform2.transform(tempRay.normal);
-      //ray.normal = normalV(subV(ray.hit, transform.transform(namedObjects.get(scenePosition).scene.origin)));
+      //ray.normal = normalizeV(subV(ray.hit, transform.transform(namedObjects.get(scenePosition).scene.origin)));
       ray.normal = tempTransform2.transform(tempRay.normal).normalize();
     
     
@@ -57,19 +57,33 @@ class Instance extends Scene{
 
 class Sphere extends Scene {
   public float radius;
-
-  Sphere(Vec origin) {
+  private Box makeBox(){
+    Vec mins = V();
+    Vec maxs = V();
+    mins.x = origin.x - radius;
+    maxs.x = origin.x + radius;
+    mins.y = origin.y - radius;
+    maxs.y = origin.y + radius;
+    mins.z = origin.z + radius;
+    maxs.z = origin.z - radius;
+    
+    return new Box(mins, maxs);
+  }
+  Sphere() {
     super("sphere");
+    box = makeBox();
   }
   Sphere(float radius, Vec origin) {
     super(origin, "sphere"); 
     this.radius = radius;
+    box = makeBox();
   }
   Sphere(float radius, Vec origin, Vec diffuseColor, Vec diffuseAmbient) { 
     super(origin, "sphere"); 
     this.radius = radius;
     this.diffuseColor = diffuseColor; 
     this.diffuseAmbient = diffuseAmbient;
+    box = makeBox();
   } 
 
   void intersectionMethod(Ray ray) {
@@ -85,12 +99,12 @@ class Sphere extends Scene {
         ray.minDistance = abs(d1);
         ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
-        ray.normal = normalV(subV(ray.hit, origin));
+        ray.normal = normalizeV(subV(ray.hit, origin));
       } else if (-d2 > 0.0 && d2>d1 && abs(d2) < abs(ray.minDistance)) {
         ray.minDistance = abs(d2);
         ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
-        ray.normal = normalV(subV(ray.hit, origin));      
+        ray.normal = normalizeV(subV(ray.hit, origin));      
       }
     }
   }
@@ -156,12 +170,12 @@ class MovingSphere extends Scene {
         ray.minDistance = abs(d1);
         ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
-        ray.normal = normalV(subV(ray.hit, origin));
+        ray.normal = normalizeV(subV(ray.hit, origin));
       } else if (-d2 > 0.0 && d2>d1 && abs(d2) < abs(ray.minDistance)) {
         ray.minDistance = abs(d2);
         ray.sceneIndex = sceneObjects.indexOf(this);
         ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
-        ray.normal = normalV(subV(ray.hit, origin));      
+        ray.normal = normalizeV(subV(ray.hit, origin));      
       }
     }
   }
@@ -192,8 +206,24 @@ class Polygon extends Scene {
   ArrayList<Vec> vertices =new  ArrayList<Vec>();
   Polygon() {
     super("polygon");
+    box = makeBox();
   }
-
+  Polygon(ArrayList<Vec> vertices) {
+    super("polygon");
+    this.vertices = vertices;
+    box = makeBox();
+  }
+  Polygon(ArrayList<Vec> vertices, Vec diffuseColor, Vec diffuseAmbient) {
+    super("polygon");
+    this.vertices = vertices;
+    this.diffuseColor = diffuseColor; 
+    this.diffuseAmbient = diffuseAmbient;
+    box = makeBox();
+  }
+  void addVertex(Vec vert){
+    vertices.add(vert);
+    box = makeBox();
+  }
   Vec getNormal() {
     if (vertices.size() >=3) {
       Vec n = crossV(subV(vertices.get(1), vertices.get(0)), subV(vertices.get(2), vertices.get(0))).normalize();
@@ -210,9 +240,13 @@ class Polygon extends Scene {
       Vec lightDirection = lights.get(i).getDirection(hit);
       if (dotV(n, lightDirection) > 0.0)n = scaleV(n, -1.0);
       Ray reverse = new Ray(hit, scaleV(lightDirection, 1));
-
+      
+      outerloop:
       for (int j =0; j<sceneObjects.size(); j++) {
         if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
+        if(reverse.sceneIndex >-1){
+            break outerloop;
+        }
       }
 
       if (reverse.sceneIndex <0) {
@@ -230,7 +264,21 @@ class Polygon extends Scene {
     } 
     return str;
   }
-
+  Box makeBox(){
+    float maxX = -10000, maxY = -10000, maxZ = -10000;
+    float minX = 10000, minY = 10000, minZ = 10000;
+    for(int i = 0; i< vertices.size(); i++){
+      maxX = max(maxX, vertices.get(i).x);
+      minX = min(minX, vertices.get(i).x);
+      
+      maxY = max(maxY, vertices.get(i).y);
+      minY = min(minY, vertices.get(i).y);
+      
+      minZ = max(maxZ, vertices.get(i).z);
+      maxZ = min(minZ, vertices.get(i).z);    
+    }
+    return new Box(V(minX, minY, minZ), V(maxX, maxY, maxZ));  
+  }
   void intersectionMethod(Ray ray) {
     if (vertices.size() >=3) {
 
@@ -279,6 +327,7 @@ class List extends Scene {
   ArrayList<Scene> sceneList = new ArrayList<Scene>();
   int hitIndex = -1;
   List(){super("list");}
+  List(ArrayList<Scene> sceneList){super("list"); this.sceneList = sceneList;}
   void addObject(Scene object){
     sceneList.add(object);
   }
@@ -288,13 +337,17 @@ class List extends Scene {
   void intersectionMethod(Ray ray) {
     for(int i = 0; i<sceneList.size(); i++){
       Ray tempRay = new Ray(ray.origin, ray.direction);
-      sceneList.get(i).intersectionMethod(tempRay);
+      sceneList.get(i).getBox().intersectionMethod(tempRay);
       if(tempRay.minDistance < ray.minDistance){
-        ray.sceneIndex = sceneObjects.indexOf(this);
-        ray.minDistance = tempRay.minDistance;        
-        ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);
-        ray.normal = tempRay.normal;
-        hitIndex = i;
+        tempRay = new Ray(ray.origin, ray.direction);
+        sceneList.get(i).intersectionMethod(tempRay);
+        if(tempRay.minDistance < ray.minDistance){
+          ray.sceneIndex = sceneObjects.indexOf(this);
+          ray.minDistance = tempRay.minDistance;        
+          ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);
+          ray.normal = tempRay.normal;
+          hitIndex = i;
+        }
       }
     }
   }
