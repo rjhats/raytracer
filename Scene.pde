@@ -5,6 +5,10 @@ class Scene {
   public Vec diffuseAmbient = V();
   void intersectionMethod(Ray ray) {
   }
+  Scene(String type){
+    this.type = type;
+    origin = V();
+  }
   Scene(Vec origin, String type) { 
     this.origin = origin; 
     this.type = type;

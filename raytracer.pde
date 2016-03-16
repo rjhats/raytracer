@@ -20,7 +20,7 @@ Vec diffuseColor = V(0, 0, 0), diffuseAmbient = V(0, 0, 0), background = V(0, 0,
 // global matrix values
 PMatrix3D global_mat;
 float[] gmat = new float[16];  // global matrix values
-
+int stringIncrement = 0;
 // Some initializations for the scene.
 
 void setup() {
@@ -137,15 +137,6 @@ void interpreter(String filename) {
       namedScene named = new namedScene(token[1], sceneObjects.get(sceneObjects.size() -1));
       sceneObjects.remove(sceneObjects.size() -1);
       namedObjects.add(named);
-    }else if (token[0].equals("instance")) {
-      namedScene named = new namedScene(token[1], new Sphere(V()));
-      int scenePosition = namedObjects.indexOf(named);
-      if(scenePosition >= 0){
-        Instance instance = new Instance(matrices.get(currentTransform), scenePosition);
-        sceneObjects.add(instance);
-      }
-      else println("Object not found");
-      
     }else if (token[0].equals("point_light")) {
       Vec origin = V(float(token[1]), float(token[2]), float(token[3]));
       Vec light_color = V(float(token[4]), float(token[5]), float(token[6]));  
@@ -160,34 +151,13 @@ void interpreter(String filename) {
       // TODO
       diffuseColor=  V(float(token[1]), float(token[2]), float(token[3]));
       diffuseAmbient=  V(float(token[4]), float(token[5]), float(token[6]));
-    } else if (token[0].equals("sphere")) {
-      // TODO
-      Sphere object = new Sphere(float(token[1]), matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4]))), diffuseColor, diffuseAmbient);
-      sceneObjects.add(object);
-    } else if (token[0].equals("moving_sphere")) {
-      // TODO
-      Vec O1 = matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4])));
-      Vec O2 = matrices.get(currentTransform).transform(V(float(token[5]), float(token[6]), float(token[7])));
-      MovingSphere object = new MovingSphere(float(token[1]), O1, O2, diffuseColor, diffuseAmbient);
-      sceneObjects.add(object);
-    }else if (token[0].equals("box")) {
-      // TODO
-      Vec min = matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3])));
-      Vec max = matrices.get(currentTransform).transform(V(float(token[4]), float(token[5]), float(token[6])));
-      Box object = new Box(min, max, diffuseColor, diffuseAmbient);
-      sceneObjects.add(object);
-    }else if (token[0].equals("begin")) {      
-      Polygon polygon = new Polygon();
-      polygon.setColor(diffuseColor, diffuseAmbient);
-      i++; 
-      token = splitTokens(str[i], " "); // Get a line and parse tokens.
-      while (token[0].equals("vertex")) {
-        polygon.vertices.add(matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3]))));
-        i++; 
-        token = splitTokens(str[i], " ");
-      }
-      if (token[0].equals("end")) sceneObjects.add(polygon);
-    } else if (token[0].equals("read")) {  // reads input from another file
+    }else if (token[0].equals("instance") || 
+              token[0].equals("box") ||
+              token[0].equals("moving_sphere") ||
+              token[0].equals("sphere") ||
+              token[0].equals("begin")) {
+      i = loadObject(sceneObjects, str, i);
+    }else if (token[0].equals("read")) {  // reads input from another file
       interpreter (token[1]);
     } else if (token[0].equals("color")) {  // example command -- not part of ray tracer
       float r = float(token[1]);
@@ -201,17 +171,12 @@ void interpreter(String filename) {
       float y1 = float(token[4]);
       rect(x0, height-y1, x1-x0, y1-y0);
     } else if (token[0].equals("translate")) {
-      // save the current image to a .png file
       matrices.get(currentTransform).translate(V(float(token[1]), float(token[2]), float(token[3])));
     } else if (token[0].equals("scale")) {
-      // save the current image to a .png file
       matrices.get(currentTransform).scale(V(float(token[1]), float(token[2]), float(token[3])));
     } else if (token[0].equals("rotate")) {
-      // save the current image to a .png file
       matrices.get(currentTransform).rotate(float(token[1]), V(float(token[2]), float(token[3]), float(token[4])));
     } else if (token[0].equals("push")) {
-      // save the current image to a .png file
-      //matrices.add(matrices.get(currentTransform).copy());
       matrices.add(matrices.get(currentTransform).copy());
       currentTransform++;
     } else if (token[0].equals("pop")) {
@@ -317,4 +282,70 @@ void restartTracing() {
   diffuseAmbient = V(0, 0, 0); 
   background = V(0, 0, 0);
   usingLens = false;
+}
+
+int loadObject(ArrayList<Scene> listOfScenes, String[] str, int i ){
+  String[] token = splitTokens(str[i], " "); // Get a line and parse tokens.
+  if (token[0].equals("instance")) {
+      namedScene named = new namedScene(token[1], new Sphere(V()));
+      int scenePosition = namedObjects.indexOf(named);
+      if(scenePosition >= 0){
+        Instance instance = new Instance(matrices.get(currentTransform), scenePosition);
+        listOfScenes.add(instance);
+      }
+      else println("Object not found");
+      
+    }
+    else if (token[0].equals("sphere")) {
+      // TODO
+      Sphere object = new Sphere(float(token[1]), matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4]))), diffuseColor, diffuseAmbient);
+      listOfScenes.add(object);
+    } else if (token[0].equals("moving_sphere")) {
+      // TODO
+      Vec O1 = matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4])));
+      Vec O2 = matrices.get(currentTransform).transform(V(float(token[5]), float(token[6]), float(token[7])));
+      MovingSphere object = new MovingSphere(float(token[1]), O1, O2, diffuseColor, diffuseAmbient);
+      listOfScenes.add(object);
+    }else if (token[0].equals("box")) {
+      // TODO
+      Vec min = matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3])));
+      Vec max = matrices.get(currentTransform).transform(V(float(token[4]), float(token[5]), float(token[6])));
+      Box object = new Box(min, max, diffuseColor, diffuseAmbient);
+      listOfScenes.add(object);
+    }else if (token[0].equals("begin")) {      
+      Polygon polygon = new Polygon();
+      polygon.setColor(diffuseColor, diffuseAmbient);
+      i++; 
+      token = splitTokens(str[i], " "); // Get a line and parse tokens.
+      while (token[0].equals("vertex")) {
+                //println("adding " + (V(float(token[1]), float(token[2]), float(token[3]))).toString());
+        polygon.vertices.add(matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3]))));
+        i++; 
+        token = splitTokens(str[i], " ");
+      }
+      if (token[0].equals("end")) {sceneObjects.add(polygon);
+      //println("ending "+ i + " " +sceneObjects.size() +"\n");
+      }
+    }
+    else if (token[0].equals("begin_list")) {      
+      List object = new List();
+      i++; 
+      token = splitTokens(str[i], " "); // Get a line and parse tokens.
+      while (!token[0].equals("end_list")) {
+        loadObject(object.getList(), str, i);
+        i++; 
+        token = splitTokens(str[i], " ");
+      }
+      if (token[0].equals("end_list")) {listOfScenes.add(object);
+      }
+    }
+    return i;
+
+
+
+
+
+
+
+
 }

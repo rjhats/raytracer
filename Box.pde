@@ -8,7 +8,6 @@ class Box extends Scene{
     this.maxCoords = maxCoords;
     this.diffuseColor = diffuseColor;
     this.diffuseAmbient = diffuseAmbient;
-    println(minCoords.toString() + "\n" + maxCoords.toString());
   }
   void intersectionMethod(Ray ray){
     float txMin = (minCoords.x - ray.origin.x)/ray.direction.x;
@@ -54,7 +53,7 @@ class Box extends Scene{
   
   Vec lightObject(Ray ray) {
     Vec surfaceColor = V();
-    Vec n = getNormal();
+    Vec n = getNormal(ray.hit);
       for (int i =0; i< lights.size(); i++) {
       Vec lightDirection = lights.get(i).getDirection(ray.hit);
       if (dotV(n, lightDirection) > 0.0)n = scaleV(n, -1.0);
@@ -75,5 +74,43 @@ class Box extends Scene{
     Vec c1 = subV(V(minCoords.x,maxCoords.y,minCoords.z),minCoords);
     Vec c2 = subV(V(maxCoords.x,minCoords.y,minCoords.z),minCoords);
     return crossV(c2,c1).normalize();    
+  }
+  Vec getNormal(Vec hit){
+    float[] nums = new float[6];  
+    nums[0] = abs(minCoords.x - hit.x);
+    nums[1] = abs(maxCoords.x - hit.x);
+    nums[2] = abs(minCoords.y - hit.y);
+    nums[3] = abs(maxCoords.y - hit.y);
+    nums[4] = abs(minCoords.z - hit.z);
+    nums[5] = abs(maxCoords.z - hit.z);
+    float lowest = min(nums[0], min(nums[1], min(nums[2], min(nums[3], min(nums[4], nums[5])))));
+    int location = -1;
+    for(int i = 0; i<nums.length; i++){
+      if(abs(nums[i] - lowest) < .000005) location = i; 
+    }
+    if(location == 0){
+        Vec c1 = subV(V(minCoords.x,maxCoords.y,minCoords.z),minCoords);
+        Vec c2 = subV(V(minCoords.x,minCoords.y,maxCoords.z),minCoords);
+      return crossV(c2,c1).normalize();}
+    else if(location == 1){
+      Vec c1 = subV(V(maxCoords.x,maxCoords.y,minCoords.z),maxCoords);
+      Vec c2 = subV(V(maxCoords.x,minCoords.y,maxCoords.z),maxCoords);
+      return crossV(c2,c1).normalize();
+    }
+    else if(location == 2){
+        Vec c1 = subV(V(maxCoords.x,minCoords.y,minCoords.z),minCoords);
+        Vec c2 = subV(V(minCoords.x,minCoords.y,maxCoords.z),minCoords);
+      return crossV(c2,c1).normalize();}
+    else if(location == 3){
+      Vec c1 = subV(V(maxCoords.x,maxCoords.y,minCoords.z),maxCoords);
+      Vec c2 = subV(V(minCoords.x,maxCoords.y,maxCoords.z),maxCoords);
+    return crossV(c2,c1).normalize(); } 
+    else if(location == 4){
+        Vec c1 = subV(V(minCoords.x,maxCoords.y,minCoords.z),minCoords);
+        Vec c2 = subV(V(maxCoords.x,minCoords.y,minCoords.z),minCoords);
+      return crossV(c2,c1).normalize(); } 
+    else{Vec c1 = subV(V(minCoords.x,maxCoords.y,maxCoords.z),maxCoords);
+      Vec c2 = subV(V(maxCoords.x,minCoords.y,maxCoords.z),maxCoords);
+      return crossV(c2,c1).normalize(); }
   }
 }

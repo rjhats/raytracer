@@ -85,7 +85,7 @@ Vec crossV(Vec v1, Vec v2) {
 Vec multV(Vec v1, Vec v2) { 
   return V(v1.x*v2.x, v1.y*v2.y, v1.z*v2.z);
 }
-Vec invertV(Vec v){
+Vec invertV(Vec v) {
   return V(1/v.x, 1/v.y, 1/v.z);
 }
 float dotV(Vec v1, Vec v2) { 
@@ -100,60 +100,32 @@ color colorV(Vec v1) {
 
 
 class Transform {
-  float[][] matrix = new float[4][4];
+  float[][] matrix;
   Transform() { 
-    identity(matrix);
+    matrix = identity();
   }
   Transform(float[][] matrix) {
     this.matrix = matrix;
-  }
-  float[][] scalarMult(float[][] matrix, float scalar){
-    int rows = matrix.length;
-    int columns = matrix[0].length;
-    float[][] tempMatrix = new float[rows][columns];
-    for(int i=0; i<rows;i++){
-      for(int j=0; j<columns; j++){
-        tempMatrix[i][j] = matrix[i][j] * scalar;
-      }
-    }
-    return tempMatrix;
-  }
-  void identity(float[][] mat4x4) {
-    mat4x4[0][0] = 1.0;
-    mat4x4[1][1] = 1.0;
-    mat4x4[2][2] = 1.0;
-    mat4x4[3][3] = 1.0;
-  }
-  String toString() {
-    String out = "";
-    for (int i=0; i<matrix.length; i++) {
-      for (int j=0; j<matrix[i].length; j++) {
-        out+= matrix[i][j] + " ";
-      }
-      out+="\n";
-    }
-    return out;
-  }
+  }  
+  
   void translate(Vec v) {
-    float[][] tempTranslate = new float[4][4];
-    identity(tempTranslate);
+    float[][] tempTranslate = identity();
     tempTranslate[0][3] = v.x;
     tempTranslate[1][3] = v.y;
     tempTranslate[2][3] = v.z;
     matrix = TMM(matrix, tempTranslate);
   }
+  
   void scale(Vec v) {
-
-    float[][] tempScale = new float[4][4];
-    identity(tempScale);
-    tempScale[0][0] *= v.x;
-    tempScale[1][1] *= v.y;
-    tempScale[2][2] *= v.z;    
+    float[][] tempScale = identity();
+    tempScale[0][0] = v.x;
+    tempScale[1][1] = v.y;
+    tempScale[2][2] = v.z;    
     matrix = TMM(matrix, tempScale);
   }
+  
   void rotate(float A, Vec v) {
-    float[][] tempRotation = new float[4][4];
-    identity(tempRotation);
+    float[][] tempRotation = identity();
     v.normalize();
     float a = (PI * A)/180.0;
     tempRotation[0][0] = (v.x*v.x)*(1-cos(a)) + cos(a);
@@ -170,91 +142,139 @@ class Transform {
     tempRotation[3][3] = 1;
     matrix = TMM(matrix, tempRotation);
   }
+  
   Vec transform(Vec v) {
-
     float x = (matrix[0][0] * v.x) + (matrix[0][1] * v.y) + (matrix[0][2] * v.z) + (matrix[0][3] * 1);
     float y = (matrix[1][0] * v.x) + (matrix[1][1] * v.y) + (matrix[1][2] * v.z) + (matrix[1][3] * 1);
     float z = (matrix[2][0] * v.x) + (matrix[2][1] * v.y) + (matrix[2][2] * v.z) + (matrix[2][3] * 1);
     return V(x, y, z);
   }
-  int sign(int num){
-    if(num%2==0)return 1;
-    return -1;
-  }
-  float[][] transpose(){
-    return transpose(matrix);
-  }
-  float[][] transpose(float[][] matrix){
-    if (matrix.length <=0)return null;
-    int rows = matrix.length;
-    int columns = matrix[0].length;
-    float[][] tempMatrix = new float[rows][columns];
-    for(int i =0; i<rows; i++){
-      for(int j =0; j<columns; j++){
-        tempMatrix[i][j] = matrix[j][i];      
-      }   
-    }
-    return tempMatrix;
-  }
-  float determinant(float[][] matrix){
-    if (matrix.length <=0)return -1;
-    if(matrix.length == 1) return matrix[0][0];
-    else if(matrix.length == 2){
-      float sum = (matrix[0][0] * matrix[1][1]) - (matrix[0][1] * matrix[1][0]);
-      return sum;
-    }
-    float sum = 0;
-    for(int i=0; i<matrix[0].length; i++){
-      sum += sign(i) * matrix[0][i] * determinant(createSubMatrix(matrix,0,i));
-    }    
-    return sum;    
-  }
-  float[][] createSubMatrix(float[][] matrix, int excludingRow, int excludingCol){
-    if (matrix.length <=0)return null;
-    int rows = matrix.length;
-    int columns = matrix[0].length;
-    float[][] tempMatrix = new float[rows-1][columns-1];
-    int r = -1;
-    for(int i=0; i<rows; i++){
-      if(i == excludingRow)continue;
-      r++;
-      int c = -1;
-      for(int j=0; j<columns;j++){
-        if(j == excludingCol)continue;
-        tempMatrix[r][++c] = matrix[i][j];      
-      }    
-    }    
-    return tempMatrix; 
-  }
-  float[][] cofactor(float[][] matrix){
-    if (matrix.length <=0)return null;
-    int rows = matrix.length;
-    int columns = matrix[0].length;
-    float[][] tempMatrix = new float[rows][columns];
-    for(int i=0; i<rows; i++){
-      for(int j=0; j<columns; j++){
-        tempMatrix[i][j] = sign(i) * sign(j) * determinant(createSubMatrix(matrix, i,j));
-      }
-    }
-    return tempMatrix;   
-  }
-  float[][] adjoint(float[][] matrix){
-    return transpose(cofactor(matrix));
   
+  String toString() {
+    String out = "";
+    for (int i=0; i<matrix.length; i++) {
+      for (int j=0; j<matrix[i].length; j++) {
+        out+= matrix[i][j] + " ";
+      }
+      out+="\n";
+    }
+    return out;
   }
-  float[][] inverse(float[][] matrix){
-    return scalarMult(transpose(cofactor(matrix)), 1.0/determinant(matrix));
-  }
+
   Transform copy() {
     return new Transform(matrix);
-  }
+  }  
+  
+  
 }
 Transform translate(Transform t, Vec v) {
   t.translate(v);
   return t;
 }
 
+int sign(int num) {
+  if (num%2==0)return 1;
+  return -1;
+}
 
+float[][] scalarMult(float[][] matrix, float scalar) {
+    int rows = matrix.length;
+    int columns = matrix[0].length;
+    float[][] tempMatrix = new float[rows][columns];
+    for (int i=0; i<rows; i++) {
+      for (int j=0; j<columns; j++) {
+        tempMatrix[i][j] = matrix[i][j] * scalar;
+      }
+    }
+    return tempMatrix;
+  }
+  
+  float[][] identity() {
+    float[][] mat4x4 = new float[4][4];
+    mat4x4[0][0] = 1.0;
+    mat4x4[1][1] = 1.0;
+    mat4x4[2][2] = 1.0;
+    mat4x4[3][3] = 1.0;
+    return mat4x4;
+  }
+  
+float determinant(float[][] matrix) {
+  if (matrix.length <=0)return -1;
+  if (matrix.length == 1) return matrix[0][0];
+  else if (matrix.length == 2) {
+    float sum = (matrix[0][0] * matrix[1][1]) - (matrix[0][1] * matrix[1][0]);
+    return sum;
+  }
+  float sum = 0;
+  for (int i=0; i<matrix[0].length; i++) {
+    sum += sign(i) * matrix[0][i] * determinant(createSubMatrix(matrix, 0, i));
+  }    
+  return sum;
+}
+
+
+float[][] createSubMatrix(float[][] matrix, int excludingRow, int excludingCol) {
+  if (matrix.length <=0)return null;
+  int rows = matrix.length;
+  int columns = matrix[0].length;
+  float[][] tempMatrix = new float[rows-1][columns-1];
+  int r = -1;
+  for (int i=0; i<rows; i++) {
+    if (i == excludingRow)continue;
+    r++;
+    int c = -1;
+    for (int j=0; j<columns; j++) {
+      if (j == excludingCol)continue;
+      tempMatrix[r][++c] = matrix[i][j];
+    }
+  }    
+  return tempMatrix;
+}
+
+
+float[][] cofactor(float[][] matrix) {
+  if (matrix.length <=0)return null;
+  int rows = matrix.length;
+  int columns = matrix[0].length;
+  float[][] tempMatrix = new float[rows][columns];
+  for (int i=0; i<rows; i++) {
+    for (int j=0; j<columns; j++) {
+      tempMatrix[i][j] = sign(i) * sign(j) * determinant(createSubMatrix(matrix, i, j));
+    }
+  }
+  return tempMatrix;
+}
+
+
+float[][] adjoint(float[][] matrix) {
+  return transpose(inverse(matrix));
+}
+float[][] adjoint(Transform transform){
+  return adjoint(transform.matrix);
+}
+
+float[][] inverse(float[][] matrix) {
+  return scalarMult(transpose(cofactor(matrix)), 1.0/determinant(matrix));
+}
+float[][] inverse(Transform transform){
+  return inverse(transform.matrix);
+}
+
+float[][] transpose(float[][] matrix) {
+  if (matrix.length <=0)return null;
+  int rows = matrix.length;
+  int columns = matrix[0].length;
+  float[][] tempMatrix = new float[rows][columns];
+  for (int i =0; i<rows; i++) {
+    for (int j =0; j<columns; j++) {
+      tempMatrix[i][j] = matrix[j][i];
+    }
+  }
+  return tempMatrix;
+}
+float[][] transpose(Transform transform){
+  return transpose(transform.matrix);
+}
 
 float[][] TMM(float[][] matrixA, float[][] matrixB) {
 
@@ -264,21 +284,19 @@ float[][] TMM(float[][] matrixA, float[][] matrixB) {
   }
   for (int i=0; i< matrixA.length; i++) {
     for (int j=0; j<matrixB.length; j++) {
-
       output[i][j] = matrixA[i][0]*matrixB[0][j] + matrixA[i][1]*matrixB[1][j] + matrixA[i][2]*matrixB[2][j] + matrixA[i][3]*matrixB[3][j];
     }
   }
-
   return output;
-}
-Transform copy(Transform t) {
-  return new Transform();
 }
 
 Vec freeTransform(float[][] matrix, Vec v) {
-    if(matrix.length <4){println("no"); return null;}
-    float x = (matrix[0][0] * v.x) + (matrix[0][1] * v.y) + (matrix[0][2] * v.z) + (matrix[0][3] * 1);
-    float y = (matrix[1][0] * v.x) + (matrix[1][1] * v.y) + (matrix[1][2] * v.z) + (matrix[1][3] * 1);
-    float z = (matrix[2][0] * v.x) + (matrix[2][1] * v.y) + (matrix[2][2] * v.z) + (matrix[2][3] * 1);
-    return V(x, y, z);
+  if (matrix.length <4) {
+    println("no"); 
+    return null;
+  }
+  float x = (matrix[0][0] * v.x) + (matrix[0][1] * v.y) + (matrix[0][2] * v.z) + (matrix[0][3] * 1);
+  float y = (matrix[1][0] * v.x) + (matrix[1][1] * v.y) + (matrix[1][2] * v.z) + (matrix[1][3] * 1);
+  float z = (matrix[2][0] * v.x) + (matrix[2][1] * v.y) + (matrix[2][2] * v.z) + (matrix[2][3] * 1);
+  return V(x, y, z);
 }

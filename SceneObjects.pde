@@ -7,18 +7,18 @@ class Instance extends Scene{
   public Transform tempTransform2 = new Transform();
   public int scenePosition;
   Instance(Transform transform, int scenePosition){
-    super(V(), "instance"); this.transform.matrix=transform.matrix; this.scenePosition = scenePosition;makeInverse();}
+    super("instance"); this.transform.matrix=transform.matrix; this.scenePosition = scenePosition;makeInverse();}
   void makeInverse(){
-    tempTransform.matrix = transform.inverse(transform.matrix);
-    tempTransform2.matrix = transform.adjoint(transform.matrix);
+    tempTransform.matrix = inverse(transform.matrix);
+    tempTransform2.matrix = adjoint(transform.matrix);
     //scene.origin = transform.transform(scene.origin);
     
   }
   void intersectionMethod(Ray ray){
-    Ray tempRay = new Ray(ray.origin, ray.direction);
-    tempRay.origin = tempTransform.transform(tempRay.origin);
-    //tempRay.direction = tempTransform.transform(tempRay.direction);
-    //tempRay.direction = freeTransform(transform.adjoint(transform.matrix), (tempRay.direction));
+    Ray tempRay = new Ray(tempTransform.transform(ray.origin), tempTransform2.transform(ray.direction));
+    //tempRay.origin = tempTransform.transform(tempRay.origin);
+    //tempRay.direction = tempTransform.transform(tempRay.direction).normalize();
+    //tempRay.direction = scaleV(freeTransform(adjoint(transform.matrix), (tempRay.direction)),1).normalize();
     //if(hitAmount <=100)println(tempRay.toString());
     //hitAmount++;
     namedObjects.get(scenePosition).scene.intersectionMethod(tempRay);
@@ -26,10 +26,13 @@ class Instance extends Scene{
       //println("hit");
       ray.sceneIndex = sceneObjects.indexOf(this);
       ray.minDistance = tempRay.minDistance;
-      ray.hit = tempRay.hit;
+      //ray.hit = tempRay.hit;
+      ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);//
       //ray.normal = tempTransform.transform(tempRay.direction);//freeTransform(transform.adjoint(transform.matrix), (tempRay.normal));
+      //ray.normal = tempRay.normal;
       //ray.normal = tempTransform2.transform(tempRay.normal);
-      ray.normal = tempRay.normal;
+      //ray.normal = normalV(subV(ray.hit, transform.transform(namedObjects.get(scenePosition).scene.origin)));
+      ray.normal = tempTransform2.transform(tempRay.normal).normalize();
     
     
     } 
@@ -42,7 +45,7 @@ class Instance extends Scene{
     //ray.origin = tempTransform.transform(ray.origin);
     //ray.origin = tempTransform.transform(ray.origin);
     //ray.normal = tempTransform2.transform(scaleV(ray.normal, -1));
-    //ray.direction = tempTransform.transform(ray.direction);
+    //ray.direction x  = tempTransform.transform(ray.direction);
     return namedObjects.get(scenePosition).scene.lightObject(ray);    
   }
 }
@@ -56,7 +59,7 @@ class Sphere extends Scene {
   public float radius;
 
   Sphere(Vec origin) {
-    super(origin, "sphere");
+    super("sphere");
   }
   Sphere(float radius, Vec origin) {
     super(origin, "sphere"); 
@@ -99,14 +102,17 @@ class Sphere extends Scene {
       Vec lightDirection = lights.get(i).getDirection(ray.hit);
       Ray reverse = new Ray(ray.hit, scaleV(lightDirection, 1));
       for (int j =0; j<sceneObjects.size(); j++) {
-        if (sceneObjects.get(j) != this)sceneObjects.get(j).intersectionMethod(reverse);
+        if (sceneObjects.get(j) != this){sceneObjects.get(j).intersectionMethod(reverse);}
+        //if(reverse.sceneIndex > -1) println("satisfy");
       }
       if (reverse.sceneIndex < 0) {
         float diffCoeff = dotV(lightDirection, ray.normal);
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }
+      //else return V(1,1,1);
     }
     return addV(diffuseAmbient, surfaceColor);
+    //return ray.hit;
   }
   String toString() {    
     return "Origin: " + origin.toString() + " radius: " + radius;
@@ -119,7 +125,6 @@ class Sphere extends Scene {
 class MovingSphere extends Scene {
   public float radius;
   public Vec origin1;
-  public float tempTime;
   Vec nuOrigin;
   MovingSphere(Vec origin) {
     super(origin, "sphere");
@@ -186,7 +191,7 @@ class MovingSphere extends Scene {
 class Polygon extends Scene {
   ArrayList<Vec> vertices =new  ArrayList<Vec>();
   Polygon() {
-    super(V(), "polygon");
+    super("polygon");
   }
 
   Vec getNormal() {
@@ -268,3 +273,35 @@ class Polygon extends Scene {
 }
 
 //---------------End Polygon---------------
+
+//---------------List---------------
+class List extends Scene {
+  ArrayList<Scene> sceneList = new ArrayList<Scene>();
+  int hitIndex = -1;
+  List(){super("list");}
+  void addObject(Scene object){
+    sceneList.add(object);
+  }
+  ArrayList<Scene> getList(){
+    return sceneList;
+  }
+  void intersectionMethod(Ray ray) {
+    for(int i = 0; i<sceneList.size(); i++){
+      Ray tempRay = new Ray(ray.origin, ray.direction);
+      sceneList.get(i).intersectionMethod(tempRay);
+      if(tempRay.minDistance < ray.minDistance){
+        ray.sceneIndex = sceneObjects.indexOf(this);
+        ray.minDistance = tempRay.minDistance;        
+        ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);
+        ray.normal = tempRay.normal;
+        hitIndex = i;
+      }
+    }
+  }
+  Vec lightObject(Ray ray){
+    return sceneList.get(hitIndex).lightObject(ray);  
+  }
+
+
+}
+//---------------End List---------------
