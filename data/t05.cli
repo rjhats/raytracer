@@ -3,7 +3,7 @@
 fov 60
 point_light 0 0 0 1 1 1
 background 0.6 0.6 0.9
-
+begin_list
 push
 
 translate 0 0 -5
@@ -37,7 +37,7 @@ read box.cli
 pop
 
 pop
-
+end_list
 reset_timer
 write t05.png
 print_timer

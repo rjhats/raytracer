@@ -265,8 +265,8 @@ class Polygon extends Scene {
     return str;
   }
   Box makeBox(){
-    float maxX = -10000, maxY = -10000, maxZ = -10000;
-    float minX = 10000, minY = 10000, minZ = 10000;
+    float maxX = -10000, maxY = -10000, maxZ = 10000;
+    float minX = 10000, minY = 10000, minZ = -10000;
     for(int i = 0; i< vertices.size(); i++){
       maxX = max(maxX, vertices.get(i).x);
       minX = min(minX, vertices.get(i).x);
@@ -274,8 +274,8 @@ class Polygon extends Scene {
       maxY = max(maxY, vertices.get(i).y);
       minY = min(minY, vertices.get(i).y);
       
-      minZ = max(maxZ, vertices.get(i).z);
-      maxZ = min(minZ, vertices.get(i).z);    
+      minZ = max(minZ, vertices.get(i).z);
+      maxZ = min(maxZ, vertices.get(i).z);    
     }
     return new Box(V(minX, minY, minZ), V(maxX, maxY, maxZ));  
   }
@@ -327,32 +327,58 @@ class List extends Scene {
   ArrayList<Scene> sceneList = new ArrayList<Scene>();
   int hitIndex = -1;
   List(){super("list");}
-  List(ArrayList<Scene> sceneList){super("list"); this.sceneList = sceneList;}
+  List(ArrayList<Scene> sceneList){super("list"); this.sceneList = sceneList;box = makeBox();}
   void addObject(Scene object){
     sceneList.add(object);
+    box = makeBox();
   }
   ArrayList<Scene> getList(){
     return sceneList;
   }
-  void intersectionMethod(Ray ray) {
-    for(int i = 0; i<sceneList.size(); i++){
-      Ray tempRay = new Ray(ray.origin, ray.direction);
-      sceneList.get(i).getBox().intersectionMethod(tempRay);
-      if(tempRay.minDistance < ray.minDistance){
+  private Box makeBox(){
+    Vec mins = V(10000, 10000, -10000);
+    Vec maxs = V(-10000, -10000, 10000);
+    for(int i =0; i<sceneList.size(); i++){
+      Vec tempMin = sceneList.get(i).getBox().minCoords;
+      Vec tempMax = sceneList.get(i).getBox().maxCoords;
+      
+      mins.x = min(mins.x, tempMin.x);
+      maxs.x = max(maxs.x, tempMax.x);
+      
+      mins.y = min(mins.y, tempMin.y);
+      maxs.y = max(maxs.y, tempMax.y);
+      
+      mins.z = max(mins.z, tempMin.z);
+      maxs.z = min(maxs.z, tempMax.z);     
+    }
+    return new Box(mins, maxs); 
+  }
+  void intersectionMethod(Ray ray) { 
+    
+    Ray tempRay = new Ray(ray.origin, ray.direction);
+    box.intersectionMethod(tempRay);
+    if(tempRay.minDistance < ray.minDistance){
+      for(int i = 0; i<sceneList.size(); i++){
         tempRay = new Ray(ray.origin, ray.direction);
-        sceneList.get(i).intersectionMethod(tempRay);
+        sceneList.get(i).getBox().intersectionMethod(tempRay);
         if(tempRay.minDistance < ray.minDistance){
-          ray.sceneIndex = sceneObjects.indexOf(this);
-          ray.minDistance = tempRay.minDistance;        
-          ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);
-          ray.normal = tempRay.normal;
-          hitIndex = i;
+          tempRay = new Ray(ray.origin, ray.direction);
+          sceneList.get(i).intersectionMethod(tempRay);
+          if(tempRay.minDistance < ray.minDistance){
+            ray.sceneIndex = sceneObjects.indexOf(this);
+            ray.minDistance = tempRay.minDistance;        
+            ray.hit = travelV(ray.origin, ray.direction, ray.minDistance);
+            ray.normal = tempRay.normal;
+            hitIndex = i;
+          }
         }
       }
     }
+    
   }
   Vec lightObject(Ray ray){
     return sceneList.get(hitIndex).lightObject(ray);  
+    //return box.lightObject(ray);  
   }
 
 

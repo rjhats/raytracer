@@ -239,6 +239,10 @@ Vec computePixel(Vec background, Ray ray) {
 }
 void colorImage(Vec background) {
   loadPixels();
+  ///debug
+  float curo = .1;
+  float telo = (width*height* curo);
+  //debug
   float angle = tan(PI * 0.5 * fov / 180.0);
   if(numRays < 1) numRays = 1;
   for (int i = 0; i < width*height; i++) {
@@ -274,6 +278,14 @@ void colorImage(Vec background) {
         coloration = addV(coloration,computePixel(background, ray));
     }
     pixels[i] = colorV(scaleV(coloration, 1.0/(numRays)));
+    //debug
+    if(i >= telo){
+      println("Currently at " + curo * 100.0 + "% Time is now "+ timer/1000.0 + " seconds");
+      curo +=.1;      
+      telo = (width*height* curo);
+    }
+    //debug*/
+      
   }
   updatePixels();
 }
@@ -291,6 +303,7 @@ void restartTracing() {
   diffuseColor = V(0, 0, 0); 
   diffuseAmbient = V(0, 0, 0); 
   background = V(0, 0, 0);
+  timer = 0;
   usingLens = false;
 }
 
