@@ -100,7 +100,8 @@ void keyPressed() {
   case '0':
   println("starting 10");
     restartTracing();
-    interpreter("t10.cli\n"); 
+    interpreter("t10.cli"); 
+    println("finished 10\n");
     break;
   case 'q':  
     exit(); 
@@ -167,10 +168,10 @@ void interpreter(String filename) {
       shuu.get(shuu.size()-1).add(list);
       println("added list" + sceneObjects.size());
     }else if (token[0].equals("end_accel")) {
-      List list = new List(shuu.get(shuu.size()-1));      
+      BVHList list = new BVHList(shuu.get(shuu.size()-1));      
       shuu.remove(shuu.size()-1);
       shuu.get(shuu.size()-1).add(list);
-      println("added list" + sceneObjects.size());
+      //println("added BVHList" + sceneObjects.size());
     }else if (token[0].equals("read")) {  // reads input from another file
       interpreter (token[1]);
     } else if (token[0].equals("color")) {  // example command -- not part of ray tracer
@@ -206,7 +207,7 @@ void interpreter(String filename) {
       println ("timer = " + seconds);
     } else if (token[0].equals("write")) {
       // save the current image to a .png file
-      println(sceneObjects.size());
+      //println(sceneObjects.size());
       colorImage(background);
       save(token[1]);
     }
@@ -240,6 +241,7 @@ Vec computePixel(Vec background, Ray ray) {
 void colorImage(Vec background) {
   loadPixels();
   ///debug
+  float tor = millis();
   float curo = .1;
   float telo = (width*height* curo);
   //debug
@@ -279,8 +281,10 @@ void colorImage(Vec background) {
     }
     pixels[i] = colorV(scaleV(coloration, 1.0/(numRays)));
     //debug
+    /*
     if(i >= telo){
-      println("Currently at " + curo * 100.0 + "% Time is now "+ timer/1000.0 + " seconds");
+      float tema = millis();
+      println("Currently at " + i/(1.0* width*height)*100.0 + "% Time passed "+ (tema-tor)/1000.0 + " seconds");
       curo +=.1;      
       telo = (width*height* curo);
     }

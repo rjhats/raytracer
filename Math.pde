@@ -67,6 +67,9 @@ Vec normalizeV(Vec v) {
 Vec V(float x, float y) {
   return new Vec(x, y, 0);
 }
+Vec V(Vec v){
+  return V(v.x, v.y, v.z);
+}
 Vec addV(Vec v1, Vec v2) { 
   return V(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
@@ -93,6 +96,12 @@ Vec multV(Vec v1, Vec v2) {
 }
 Vec invertV(Vec v) {
   return V(1/v.x, 1/v.y, 1/v.z);
+}
+Vec min(Vec v1, Vec v2){
+  return V(min(v1.x, v2.x), min(v1.y, v2.y), min(v1.z, v2.z));
+}
+Vec max(Vec v1, Vec v2){
+  return V(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z));
 }
 float dotV(Vec v1, Vec v2) { 
   return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;

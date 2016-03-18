@@ -4,7 +4,11 @@ class Scene {
   public String type = "";
   public Vec diffuseColor = V();
   public Vec diffuseAmbient = V();
+  public Vec center = V();
   void intersectionMethod(Ray ray) {
+  }
+  Vec getCenter(){
+    return center;
   }
   Scene(String type){
     this.type = type;
