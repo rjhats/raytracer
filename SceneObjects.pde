@@ -252,12 +252,10 @@ class Polygon extends Scene {
 
   Vec lightObject(Ray ray) {
     Vec surfaceColor = V();
-    Vec hit = travelV(ray.origin, ray.direction, ray.minDistance);
-    Vec n = crossV(subV(vertices.get(1), vertices.get(0)), subV(vertices.get(2), vertices.get(0))).normalize();
     for (int i =0; i< lights.size(); i++) {
-      Vec lightDirection = lights.get(i).getDirection(hit);
-      if (dotV(n, lightDirection) > 0.0)n = scaleV(n, -1.0);
-      Ray reverse = new Ray(hit, scaleV(lightDirection, 1));
+      Vec lightDirection = lights.get(i).getDirection(ray.hit);
+      if (dotV(ray.normal, lightDirection) > 0.0)ray.normal = scaleV(ray.normal, -1.0);
+      Ray reverse = new Ray(ray.hit, lightDirection);
 
     outerloop:
       for (int j =0; j<sceneObjects.size(); j++) {
@@ -268,7 +266,7 @@ class Polygon extends Scene {
       }
 
       if (reverse.sceneIndex <0) {
-        float diffCoeff = abs(dotV(lightDirection, n));
+        float diffCoeff = abs(dotV(lightDirection, ray.normal));
         surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
       }
     }
@@ -306,33 +304,28 @@ class Polygon extends Scene {
 
       Vec P0P1 = subV(P1, P0);
       Vec P0P2 = subV(P2, P0);
-      Vec N = crossV(P0P1, P0P2);
+      Vec pvec = crossV(ray.direction, P0P2);
+      float det = dotV(P0P1, pvec);
 
-      float N_dot_Dir = dotV(ray.direction, N);
+      if (det>.000005) return;
 
-      float d = dotV(N, P0);
-      float t = (dotV(ray.origin, N) + d)/N_dot_Dir;
-      if (t<0) return;
-      Vec hit = addV(ray.origin, scaleV(ray.direction, t));
+      float invDet = 1.0/det;
 
-      for (int j = 0; j<vertices.size(); j++) {      
-        Vec E0 = V(); 
-        Vec E1 = V();
-        if (j==vertices.size() -1) {
-          E0 = vertices.get(j);
-          E1 = vertices.get(0);
-        } else {
-          E0 = vertices.get(j);
-          E1 = vertices.get(j+1);
-        }
-        Vec hitE0 = subV(hit, E0);
-        Vec E0E1 = subV(E1, E0);
-        Vec CrossE = crossV(E0E1, hitE0);
-        if (dotV(N, CrossE) <0) return;
-      }
-      if (abs(ray.minDistance) > abs(t)) {
-        ray.minDistance = abs(t);
+      Vec tvec = subV(ray.origin, P0);
+      float u = dotV(tvec, pvec) *invDet;
+      if (u<0||u>1) return;
+
+      Vec qvec = crossV(tvec, P0P1);
+      float v= dotV(ray.direction, qvec) *invDet;
+      if (v < 0||u+v >1) return;
+
+      float t= dotV(P0P2, qvec) * invDet;
+
+      if (t<ray.minDistance) {
+        ray.minDistance = t;
         ray.sceneIndex = sceneObjects.indexOf(this);
+        ray.hit = travelV(ray.origin, ray.direction, ray.minDistance); 
+        ray.normal = getNormal();
       }
     }
   }
@@ -365,29 +358,9 @@ class List extends Scene {
   }
   private Box makeBox() {
     Box bo = new Box();
-    Vec mins = V(10000, 10000, 10000);
-    Vec maxs = V(-10000, -10000, -10000);
-    float tor = millis();
     for (int i =0; i<sceneList.size(); i++) {
       bo = bo.expandBox(sceneList.get(i).getBox());
-
-      /*
-      Vec tempMin = sceneList.get(i).getBox().minCoords;
-       Vec tempMax = sceneList.get(i).getBox().maxCoords;
-       mins = min(mins, tempMin);
-       maxs = max(maxs, tempMax);
-       
-       mins.x = min(mins.x, tempMin.x);
-       maxs.x = max(maxs.x, tempMax.x);
-       
-       mins.y = min(mins.y, tempMin.y);
-       maxs.y = max(maxs.y, tempMax.y);
-       
-       mins.z = max(mins.z, tempMin.z);
-       maxs.z = min(maxs.z, tempMax.z);  
-       */
     }
-    //return new Box(mins, maxs);
     return bo;
   }
   void intersectionMethod(Ray ray) { 
@@ -467,7 +440,7 @@ class BVHList extends Scene {
   BVHList(ArrayList<Scene> sceneList) {
     super("list"); 
     this.sceneList = sceneList;
-    maxObjects = min((int)(sceneList.size()*.01),max(10, (int)(sceneList.size()*.001)));
+    //maxObjects =  min((int)(sceneList.size()*.01), max(10, (int)(sceneList.size()*.001)));//10;
     buildTree();
     //println("There are "+ nodeList.size()+" nodes");
   }

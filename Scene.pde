@@ -7,10 +7,10 @@ class Scene {
   public Vec center = V();
   void intersectionMethod(Ray ray) {
   }
-  Vec getCenter(){
+  Vec getCenter() {
     return center;
   }
-  Scene(String type){
+  Scene(String type) {
     this.type = type;
     origin = V();
   }
@@ -25,7 +25,7 @@ class Scene {
     this.diffuseColor = Color; 
     this.diffuseAmbient = ambient;
   }
-  Box getBox(){
+  Box getBox() {
     return box;
   }
 }
@@ -43,29 +43,30 @@ class Ray extends Scene {
     super(origin, "ray"); 
     this.direction = direction;
   }
-  Scene getScene(){
+  Scene getScene() {
     return sceneObjects.get(sceneIndex);
-  
   }
   Vec flipDirection() {
     //return V(direction.x * -1,direction.y * -1,direction.z * -1);
     //return direction.scale(-1.0);
-    return scaleV(direction,-1.0);
+    return scaleV(direction, -1.0);
   }
-  String toString(){
+  String toString() {
     return "origin: " + origin.toString() + " Direction: "+ direction.toString();
   }
 }
 
-class namedScene{
+class namedScene {
   String name;
   Scene scene;
-  namedScene(String name, Scene scene){this.name = name; this.scene = scene;}
-  public boolean equals(namedScene o){
+  namedScene(String name, Scene scene) {
+    this.name = name; 
+    this.scene = scene;
+  }
+  public boolean equals(namedScene o) {
     return this.name.equals(o.name);
   }
-  @Override public boolean equals(Object o){
+  @Override public boolean equals(Object o) {
     return (o instanceof namedScene) && (this.equals((namedScene) o));
   }
-
 }

@@ -1,0 +1,257 @@
+# a ring of spheres
+
+push
+
+diffuse  0.8 0.4 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.4  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.8 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.4 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+diffuse  0.8 0.4 0.8  .2 .2 .2
+
+rotate 10  0 1 0
+begin_list
+read bun69k.cli
+end_accel
+
+pop
