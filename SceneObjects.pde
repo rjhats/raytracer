@@ -59,6 +59,7 @@ class Instance extends Scene {
 
 
 class Sphere extends Scene {
+  
   public float radius;
   private Box makeBox() {
     Vec mins = V();
@@ -128,8 +129,10 @@ class Sphere extends Scene {
         //if(reverse.sceneIndex > -1) println("satisfy");
       }
       if (reverse.sceneIndex < 0) {
+        Vec hit = scaleV(ray.hit,noiseScale);
         float diffCoeff = dotV(lightDirection, ray.normal);
-        surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, max(0, diffCoeff)), lights.get(i).light_color) );
+        if(noise)surfaceColor = addV(surfaceColor, scaleV(lights.get(i).light_color, noise_3d(hit.x, hit.y, hit.z)) );
+        else surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, min(max(0, diffCoeff),1.0)), lights.get(i).light_color) );
       }
       //else return V(1,1,1);
     }

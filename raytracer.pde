@@ -22,6 +22,9 @@ PMatrix3D global_mat;
 float[] gmat = new float[16];  // global matrix values
 ArrayList<ArrayList<Scene>> shuu = new ArrayList<ArrayList<Scene>>();
 int timer = 0;
+
+boolean noise = false;
+float noiseScale = 0;
 // Some initializations for the scene.
 
 void setup() {
@@ -159,7 +162,12 @@ void interpreter(String filename) {
       token[0].equals("sphere") ||
       token[0].equals("begin")) {
       i = loadObject( str, i);
-    } else if (token[0].equals("begin_list")) {      
+    } else if (token[0].equals("noise")) {   
+      noise = true;
+      noiseScale = float(token[1]);
+      //int m = shuu.get(shuu.size()-1).size() - 1;
+      //shuu.get(shuu.size()-1).get(m).noise = true;     
+    }else if (token[0].equals("begin_list")) {      
 
       shuu.add(new ArrayList<Scene>());
     } else if (token[0].equals("end_list")) {
@@ -321,7 +329,10 @@ int loadObject(String[] str, int i ) {
   } else if (token[0].equals("sphere")) {
     // TODO
     Sphere object = new Sphere(float(token[1]), matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4]))), diffuseColor, diffuseAmbient);
+    object.noise = noise;
+    object.noiseScale = noiseScale;
     shuu.get(shuu.size()-1).add(object);
+    noise = false;    
   } else if (token[0].equals("moving_sphere")) {
     // TODO
     Vec O1 = matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4])));
@@ -338,8 +349,9 @@ int loadObject(String[] str, int i ) {
     ArrayList<Vec> vertices =new  ArrayList<Vec>();
     i++; 
     token = splitTokens(str[i], " "); // Get a line and parse tokens.
-    while (token[0].equals("vertex")) {
+    while (!token[0].equals("end")) {
       //println("adding " + (V(float(token[1]), float(token[2]), float(token[3]))).toString());
+      if(token[0].equals("vertex"))
       vertices.add(matrices.get(currentTransform).transform(V(float(token[1]), float(token[2]), float(token[3]))));
       i++; 
       token = splitTokens(str[i], " ");

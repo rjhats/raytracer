@@ -1,4 +1,6 @@
 class Scene {
+  public boolean noise = false;
+  public float noiseScale = 0;
   public Box box;
   public Vec origin = V(0, 0, 0);
   public String type = "";
