@@ -1,4 +1,4 @@
-# personal structure
+# big bunny, in acceleration structure
 
 fov 60
 
@@ -10,7 +10,7 @@ background 0.2 0.2 1
 
 point_light  3 4  0  .8 .8 .8
 point_light -3 4  0  .2 .2 .2
-point_light  0 4  0  .5 .2 .9
+
 # these two triangles acts as a ground plane
 
 diffuse  .8 .8 .8  .2 .2 .2
@@ -28,45 +28,16 @@ vertex -100 -1 -100
 end
 
 # the bunny
-push
+
 translate 0 0 -8
+
 diffuse  .8 .8 .8  .2 .2 .2 
 
 begin_list
 read bun69k.cli
 end_accel
-pop
 
-push
-translate 0 -.5 -5.5
-scale .5 .5 .5
-diffuse  1 .87 .0  .0 .0 .0 
 
-begin_list
-read bun69k.cli
-end_accel
-pop
-
-push
-translate 2 .5 -4
-scale 1.5 1.5 1.5
-diffuse  .3 .4 .5  .05 .1 .15 
-
-begin_list
-read bun69k.cli
-end_accel
-pop
-
-push
-translate -2 .5 -4
-rotate 180 0 1 0
-scale 1.5 1.5 1.5
-diffuse  .5 .4 .3  .15 .1 .05 
-
-begin_list
-read bun69k.cli
-end_accel
-pop
 
 
 reset_timer

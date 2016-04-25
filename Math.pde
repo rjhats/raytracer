@@ -67,19 +67,19 @@ Vec normalizeV(Vec v) {
 Vec V(float x, float y) {
   return new Vec(x, y, 0);
 }
-Vec V(Vec v) {
+Vec V(Vec v){
   return V(v.x, v.y, v.z);
 }
 Vec addV(Vec v1, Vec v2) { 
   return V(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
-Vec addV(Vec v1, float s) {
+Vec addV(Vec v1, float s){
   return V(v1.x + s, v1.y + s, v1.z + s);
 }
 Vec subV(Vec v1, Vec v2) { 
   return V(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
 }
-Vec subV(Vec v1, float s) {
+Vec subV(Vec v1, float s){
   return V(v1.x - s, v1.y - s, v1.z - s);
 }
 Vec scaleV(Vec v, float s) {
@@ -97,10 +97,10 @@ Vec multV(Vec v1, Vec v2) {
 Vec invertV(Vec v) {
   return V(1/v.x, 1/v.y, 1/v.z);
 }
-Vec min(Vec v1, Vec v2) {
+Vec min(Vec v1, Vec v2){
   return V(min(v1.x, v2.x), min(v1.y, v2.y), min(v1.z, v2.z));
 }
-Vec max(Vec v1, Vec v2) {
+Vec max(Vec v1, Vec v2){
   return V(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z));
 }
 float distV(Vec v1, Vec v2){
@@ -125,7 +125,7 @@ class Transform {
   Transform(float[][] matrix) {
     this.matrix = matrix;
   }  
-
+  
   void translate(Vec v) {
     float[][] tempTranslate = identity();
     tempTranslate[0][3] = v.x;
@@ -133,7 +133,7 @@ class Transform {
     tempTranslate[2][3] = v.z;
     matrix = TMM(matrix, tempTranslate);
   }
-
+  
   void scale(Vec v) {
     float[][] tempScale = identity();
     tempScale[0][0] = v.x;
@@ -141,7 +141,7 @@ class Transform {
     tempScale[2][2] = v.z;    
     matrix = TMM(matrix, tempScale);
   }
-
+  
   void rotate(float A, Vec v) {
     float[][] tempRotation = identity();
     v.normalize();
@@ -160,14 +160,14 @@ class Transform {
     tempRotation[3][3] = 1;
     matrix = TMM(matrix, tempRotation);
   }
-
+  
   Vec transform(Vec v) {
     float x = (matrix[0][0] * v.x) + (matrix[0][1] * v.y) + (matrix[0][2] * v.z) + (matrix[0][3] * 1);
     float y = (matrix[1][0] * v.x) + (matrix[1][1] * v.y) + (matrix[1][2] * v.z) + (matrix[1][3] * 1);
     float z = (matrix[2][0] * v.x) + (matrix[2][1] * v.y) + (matrix[2][2] * v.z) + (matrix[2][3] * 1);
     return V(x, y, z);
   }
-
+  
   String toString() {
     String out = "";
     for (int i=0; i<matrix.length; i++) {
@@ -181,7 +181,9 @@ class Transform {
 
   Transform copy() {
     return new Transform(matrix);
-  }
+  }  
+  
+  
 }
 Transform translate(Transform t, Vec v) {
   t.translate(v);
@@ -194,26 +196,26 @@ int sign(int num) {
 }
 
 float[][] scalarMult(float[][] matrix, float scalar) {
-  int rows = matrix.length;
-  int columns = matrix[0].length;
-  float[][] tempMatrix = new float[rows][columns];
-  for (int i=0; i<rows; i++) {
-    for (int j=0; j<columns; j++) {
-      tempMatrix[i][j] = matrix[i][j] * scalar;
+    int rows = matrix.length;
+    int columns = matrix[0].length;
+    float[][] tempMatrix = new float[rows][columns];
+    for (int i=0; i<rows; i++) {
+      for (int j=0; j<columns; j++) {
+        tempMatrix[i][j] = matrix[i][j] * scalar;
+      }
     }
+    return tempMatrix;
   }
-  return tempMatrix;
-}
-
-float[][] identity() {
-  float[][] mat4x4 = new float[4][4];
-  mat4x4[0][0] = 1.0;
-  mat4x4[1][1] = 1.0;
-  mat4x4[2][2] = 1.0;
-  mat4x4[3][3] = 1.0;
-  return mat4x4;
-}
-
+  
+  float[][] identity() {
+    float[][] mat4x4 = new float[4][4];
+    mat4x4[0][0] = 1.0;
+    mat4x4[1][1] = 1.0;
+    mat4x4[2][2] = 1.0;
+    mat4x4[3][3] = 1.0;
+    return mat4x4;
+  }
+  
 float determinant(float[][] matrix) {
   if (matrix.length <=0)return -1;
   if (matrix.length == 1) return matrix[0][0];
@@ -265,14 +267,14 @@ float[][] cofactor(float[][] matrix) {
 float[][] adjoint(float[][] matrix) {
   return transpose(inverse(matrix));
 }
-float[][] adjoint(Transform transform) {
+float[][] adjoint(Transform transform){
   return adjoint(transform.matrix);
 }
 
 float[][] inverse(float[][] matrix) {
   return scalarMult(transpose(cofactor(matrix)), 1.0/determinant(matrix));
 }
-float[][] inverse(Transform transform) {
+float[][] inverse(Transform transform){
   return inverse(transform.matrix);
 }
 
@@ -288,7 +290,7 @@ float[][] transpose(float[][] matrix) {
   }
   return tempMatrix;
 }
-float[][] transpose(Transform transform) {
+float[][] transpose(Transform transform){
   return transpose(transform.matrix);
 }
 
