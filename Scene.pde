@@ -1,6 +1,8 @@
 class Scene {
+  public Material material = new Material(V());
   public boolean noise = false;
   public float noiseScale = 0;
+  public boolean wood, marble, stone;
   public Box box;
   public Vec origin = V(0, 0, 0);
   public String type = "";

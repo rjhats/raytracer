@@ -123,20 +123,20 @@ class Sphere extends Scene {
       Vec lightDirection = lights.get(i).getDirection(ray.hit);
       Ray reverse = new Ray(ray.hit, scaleV(lightDirection, 1));
       for (int j =0; j<sceneObjects.size(); j++) {
-        if (sceneObjects.get(j) != this) {
+        if (sceneObjects.get(j) != this&&!sceneObjects.get(j).type.equals("polygon")) {
           sceneObjects.get(j).intersectionMethod(reverse);
         }
-        //if(reverse.sceneIndex > -1) println("satisfy");
+        if(reverse.sceneIndex > -1 && sceneObjects.get(j).type.equals("polygon"))reverse.sceneIndex = 0;
       }
       if (reverse.sceneIndex < 0) {
-        Vec hit = scaleV(ray.hit,noiseScale);
+        Vec hit = ray.hit;
         float diffCoeff = dotV(lightDirection, ray.normal);
-        if(noise)surfaceColor = addV(surfaceColor, scaleV(lights.get(i).light_color, noise_3d(hit.x, hit.y, hit.z)) );
-        else surfaceColor = addV(surfaceColor, multV(scaleV(diffuseColor, min(max(0, diffCoeff),1.0)), lights.get(i).light_color) );
+        //surfaceColor = material.getMaterial(ray.hit);
+        surfaceColor = addV(surfaceColor, multV(scaleV(material.getMaterial(ray.hit), min(max(0, diffCoeff),1.0)), lights.get(i).light_color) );
       }
       //else return V(1,1,1);
     }
-    return addV(diffuseAmbient, surfaceColor);
+    return addV(material.ambient, surfaceColor);
     //return ray.hit;
   }
   String toString() {    
@@ -310,7 +310,7 @@ class Polygon extends Scene {
       Vec pvec = crossV(ray.direction, P0P2);
       float det = dotV(P0P1, pvec);
 
-      if (det>.000005) return;
+     // if (det>.000005) return;
 
       float invDet = 1.0/det;
 

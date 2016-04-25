@@ -3,7 +3,6 @@
 //  Ray Tracing Shell
 //
 ///////////////////////////////////////////////////////////////////////
-
 float fov = 0.0;
 boolean usingLens = false;
 float numRays = 1.0;
@@ -23,12 +22,20 @@ float[] gmat = new float[16];  // global matrix values
 ArrayList<ArrayList<Scene>> shuu = new ArrayList<ArrayList<Scene>>();
 int timer = 0;
 
+
+///Move to new materials class later
+Material currentMaterial;
 boolean noise = false;
+boolean wood = false;
+boolean stone = false;
+boolean marble = false;
 float noiseScale = 0;
+////////////
+
 // Some initializations for the scene.
 
 void setup() {
-  size (300, 300, P3D);  // use P3D environment so that matrix commands work properly
+  size (600, 600, P3D);  // use P3D environment so that matrix commands work properly
   noStroke();
   colorMode (RGB, 1.0);
   background (0, 0, 0);
@@ -156,17 +163,31 @@ void interpreter(String filename) {
       // TODO
       diffuseColor=  V(float(token[1]), float(token[2]), float(token[3]));
       diffuseAmbient=  V(float(token[4]), float(token[5]), float(token[6]));
+      currentMaterial = new DiffuseMaterial(diffuseColor, diffuseAmbient);
     } else if (token[0].equals("instance") || 
       token[0].equals("box") ||
       token[0].equals("moving_sphere") ||
       token[0].equals("sphere") ||
       token[0].equals("begin")) {
       i = loadObject( str, i);
-    } else if (token[0].equals("noise")) {   
-      noise = true;
-      noiseScale = float(token[1]);
+    } else if (token[0].equals("noise")) {
+      currentMaterial = new NoiseMaterial(float(token[1]));
+      currentMaterial.ambient = diffuseAmbient;
       //int m = shuu.get(shuu.size()-1).size() - 1;
       //shuu.get(shuu.size()-1).get(m).noise = true;     
+    }else if (token[0].equals("wood")) {   
+      currentMaterial = new WoodMaterial();
+      currentMaterial.ambient = diffuseAmbient;
+    }else if (token[0].equals("marble")) {   
+      currentMaterial = new MarbleMaterial(); 
+      currentMaterial.ambient = diffuseAmbient;
+      println("marble");
+    }else if (token[0].equals("stone")) {  
+      println("stone");
+      int seed = (int)random(100000);//(day()*month()*year()*minute());
+      currentMaterial = new StoneMaterial(seed);
+      currentMaterial.ambient = diffuseAmbient;
+      println(seed);
     }else if (token[0].equals("begin_list")) {      
 
       shuu.add(new ArrayList<Scene>());
@@ -216,8 +237,10 @@ void interpreter(String filename) {
     } else if (token[0].equals("write")) {
       // save the current image to a .png file
       //println(sceneObjects.size());
+      //randomSeed(100);
+      //for(int khi = 0; khi<10;khi++)println(random(15));
       colorImage(background);
-      save(token[1]);
+      save(token[1]);      
     }
   }
 }
@@ -329,10 +352,8 @@ int loadObject(String[] str, int i ) {
   } else if (token[0].equals("sphere")) {
     // TODO
     Sphere object = new Sphere(float(token[1]), matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4]))), diffuseColor, diffuseAmbient);
-    object.noise = noise;
-    object.noiseScale = noiseScale;
+    object.material = currentMaterial;
     shuu.get(shuu.size()-1).add(object);
-    noise = false;    
   } else if (token[0].equals("moving_sphere")) {
     // TODO
     Vec O1 = matrices.get(currentTransform).transform(V(float(token[2]), float(token[3]), float(token[4])));

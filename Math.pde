@@ -103,6 +103,9 @@ Vec min(Vec v1, Vec v2) {
 Vec max(Vec v1, Vec v2) {
   return V(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z));
 }
+float distV(Vec v1, Vec v2){
+  return (v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y) + (v1.z - v2.z) * (v1.z - v2.z);
+}
 float dotV(Vec v1, Vec v2) { 
   return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 }
